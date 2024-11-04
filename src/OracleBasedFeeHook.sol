@@ -12,7 +12,6 @@ import {LPFeeLibrary} from "@v4-core/libraries/LPFeeLibrary.sol";
 import {StateLibrary} from "@v4-core/libraries/StateLibrary.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IFeeOracle} from "./interfaces/IFeeOracle.sol";
-import {SnarkBasedVolatilityOracle} from "./SnarkBasedVolatilityOracle.sol";
 import {ICalcFee} from "./interfaces/ICalcFee.sol";
 
 contract OracleBasedFeeHook is BaseHook, Ownable {
@@ -31,10 +30,7 @@ contract OracleBasedFeeHook is BaseHook, Ownable {
 
     event FeeUpdate(uint256 indexed newFee, uint256 timestamp);
 
-    constructor(IPoolManager _poolManager, address _calcLib)
-        BaseHook(_poolManager)
-        Ownable(DEV_WALLET)
-    {
+    constructor(IPoolManager _poolManager, address _calcLib) BaseHook(_poolManager) Ownable(DEV_WALLET) {
         calcLib = ICalcFee(_calcLib);
     }
 
