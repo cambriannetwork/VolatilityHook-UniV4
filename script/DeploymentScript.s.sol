@@ -17,12 +17,8 @@ import {PoolId, PoolIdLibrary} from "@v4-core/types/PoolId.sol";
 
 import {SemioticsUSDC} from "./mocks/SemioticsUSDC.sol";
 import {SemioticsETH} from "./mocks/SemioticsETH.sol";
-import {RvVerifier} from "src/RvVerifier.sol";
 import {Faucet} from "src/Faucet.sol";
-import {SnarkBasedVolatilityOracle} from "src/SnarkBasedVolatilityOracle.sol";
 import {OracleBasedFeeHook} from "src/OracleBasedFeeHook.sol";
-
-import {CalcFeeLib} from "src/Calc/CalcFeeLib.sol";
 
 contract DeploymentScript is Script {
     using CurrencyLibrary for Currency;
@@ -49,12 +45,8 @@ contract DeploymentScript is Script {
         address SUSDC_ADDRESS = address(usdc);
 
         //________________________________ Deploy Verifier/Oracle ________________________________//
-        bytes32 programKey = 0x00dc70908ac47157cd47feacd62a458f405707ffbcea526fcd5620aedd5d828d;
-        SnarkBasedVolatilityOracle oracle = new SnarkBasedVolatilityOracle(programKey);
-        CalcFeeLib calcLib = new CalcFeeLib(address(oracle));
 
-        console.log("here");
-
+        //________________________________ Deploy Hook ___________________________________________//
         //________________________________ Deploy Hook ___________________________________________//
         uint160 flags = uint160(Hooks.BEFORE_INITIALIZE_FLAG | Hooks.BEFORE_SWAP_FLAG);
 

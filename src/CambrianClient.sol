@@ -2,12 +2,15 @@ pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ClientBase} from "@cambrian/contracts/ClientBase.sol";
-import {CambrianQuery, CambrianEvent, Report} from "@cambrian/contracts/Cambrian.sol";
-import {IClient} from "@cambrian/contracts/IClient.sol";
-import {CambrianRouter} from "@cambrian/contracts/CambrianRouter.sol";
+import {CambrianQuery, CambrianEvent, Report} from "@cambrian/Cambrian.sol";
+import {ClientBase} from "@cambrian/ClientBase.sol";
+import {CambrianRouter} from "@cambrian/CambrianRouter.sol";
 
-contract Client is ClientBase, Ownable, IClient {
+import {VolatilityOracle} from "./VolatilityOracle.sol";
+
+contract CambrianClient is ClientBase, IClient, Ownable {
+    VolatilityOracle public volatilityOracle;
+
     mapping(bytes32 => uint8) messages;
 
     struct Swap {
@@ -20,17 +23,17 @@ contract Client is ClientBase, Ownable, IClient {
         int24 tick;
     }
 
-    constructor()
+    constructor(address _router, address _volatilityOracle)
         Ownable(msg.sender)
         ClientBase(
-            CambrianRouter(0x37E7E71FE679EcFecA67cA3c097498604fa29B5e),
+            CambrianRouter(_router),
             CambrianQuery(
-                block.chainid,
-                address(this),
                 "name=Swap&network=1&signature=c42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67&topic_count=3&data_length=160"
             )
         )
-    {}
+    {
+        volatilityOracle = VolatilityOracle(_volatilityOracle);
+    }
 
     function executeQuery(uint64 startBlock, uint64 endBlock) external onlyOwner returns (bytes32) {
         bytes32 messageId = execute(startBlock, endBlock);
@@ -42,12 +45,14 @@ contract Client is ClientBase, Ownable, IClient {
         external
         override
     {
-        // to be overrided by custom app
-        // handle events
-    }
+        // Decode Swap data and extract sqrtPriceX96 values
+        uint160[] memory prices = new uint160[](events.length);
+        for (uint256 i = 0; i < events.length; i++) {
+            Swap memory swap = abi.decode(events[i].data, (Swap));
+            prices[i] = swap.sqrtPriceX96;
+        }
 
-    function handleStatus(bytes32 messageId, Report calldata report) external override {
-        // to be overrided by custom app
-        // handle errors also
+        // Calculate volatility using only the prices
+        uint256 volatility = volatilityOracle.updatePriceVariance(prices);
     }
 }

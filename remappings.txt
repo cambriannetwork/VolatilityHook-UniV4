@@ -13,5 +13,6 @@ solmate/=lib/v4-periphery/lib/solmate/src/
 @v4-periphery/=lib/v4-periphery/contracts/
 @sp1-contracts/=lib/sp1-contracts/contracts/src/
 @create3-factory=lib/create3-factory/src/
+@cambrian/=lib/cambrian-contracts/src/
 contracts=src/
 
