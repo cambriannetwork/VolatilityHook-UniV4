@@ -1,4 +1,4 @@
-## Volatility Hook for Uniswap V4
+## Cambrian's Uniswap V4 Demo - Hook Smart Contract 
 
 **Description**
 
