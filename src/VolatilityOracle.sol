@@ -4,20 +4,16 @@ pragma solidity ^0.8.0;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import {ICambrianClient} from "./interfaces/ICambrianClient.sol";
-
 contract VolatilityOracle is Ownable {
-    ICambrianClient public cambrianClient;
-
     uint256 public priceVariance;
 
     event PriceVarianceUpdated(uint256 priceVariance);
 
-    constructor(address _cambrianClient) Ownable(msg.sender) {
-        cambrianClient = ICambrianClient(_cambrianClient);
-    }
+    constructor() Ownable(msg.sender) {}
 
-    function updatePriceVariance(uint256[] memory prices) public returns (uint256) {
+    function updatePriceVariance(
+        uint160[] memory prices
+    ) public returns (uint256) {
         uint256 mean = 0;
 
         for (uint256 i = 0; i < prices.length; i++) {
