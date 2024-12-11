@@ -19,12 +19,12 @@ import {IQuoter} from "@v4-periphery/interfaces/IQuoter.sol";
 contract QuoterWrapperDeployment is Script {
     using CurrencyLibrary for Currency;
 
-    address poolManager = 0x75E7c1Fd26DeFf28C7d1e82564ad5c24ca10dB14;
     Quoter quoter = Quoter(0x52f09Df7814BF3274812785b9fb249020e7412d0);
 
-    address hook = 0x3BE38115fe7423B3c99abDCfFbE9e92366972080;
-    address SETH_ADDRESS = 0x9E4a871A6936A14925b63D6687674853cdB9C5CA;
-    address SUSDC_ADDRESS = 0x9042F100086279F09b45f29C2f61376980b28d69;
+    address cethAddr = vm.envAddress("CETH_ADDRESS");
+    address cusdcAddr = vm.envAddress("CUSDC_ADDRESS");
+    address hook = vm.envAddress("HOOK_ADDRESS");
+
     address deployer;
 
     function run() external {
@@ -33,23 +33,23 @@ contract QuoterWrapperDeployment is Script {
 
         vm.startBroadcast(deployer);
 
-        QuoterWrapper quoterWrapper = new QuoterWrapper(address(quoter), SETH_ADDRESS, SUSDC_ADDRESS, hook);
+        QuoterWrapper quoterWrapper = new QuoterWrapper(address(quoter), cethAddr, cusdcAddr, hook);
 
         console.log("_________________Wrapper_________________________");
-        (uint amount, uint sqrtPrice) = quoterWrapper.getOutputAmount(0, 1e18);
-        console.log("Amount in: ",amount/1e18);
+        (uint256 amount, uint256 sqrtPrice) = quoterWrapper.getOutputAmount(0, 1e18);
+        console.log("Amount in: ", amount / 1e18);
         console.log("Sqrt Price After: ", sqrtPrice);
 
         (amount, sqrtPrice) = quoterWrapper.getOutputAmount(1, 3600e18);
-        console.log("Amount in: ",amount/1e18);
+        console.log("Amount in: ", amount / 1e18);
         console.log("Sqrt Price After: ", sqrtPrice);
 
         (amount, sqrtPrice) = quoterWrapper.getInputAmount(0, 3600e18);
-        console.log("Amount in: ",amount/1e18);
+        console.log("Amount in: ", amount / 1e18);
         console.log("Sqrt Price After: ", sqrtPrice);
 
         (amount, sqrtPrice) = quoterWrapper.getInputAmount(1, 1e18);
-        console.log("Amount in: ",amount/1e18);
+        console.log("Amount in: ", amount / 1e18);
         console.log("Sqrt Price After: ", sqrtPrice);
     }
 }

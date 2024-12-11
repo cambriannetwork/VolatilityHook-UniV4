@@ -7,40 +7,50 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IVolatilityOracle} from "./interfaces/IVolatilityOracle.sol";
 
 contract FeeOracle is Ownable {
-    uint256 public ETH_VOL_SCALE = 150;
-    uint256 public MIN_FEE = 0;
+    uint256 public STANDARD_VOLUME = 150;
+    uint256 public VOLUME_DECIMALS = 1e18;
+
+    uint256 public STANDARD_VARIANCE = 30;
+    uint256 public VARIANCE_DECIMALS = 1e7;
+
+    uint256 public CONSTANT_FACTOR = 5;
+    uint256 public MIN_FEE = 100;
 
     IVolatilityOracle public volatilityOracle;
+
+    event BaseFeeUpdated(uint256 baseFee);
 
     constructor(address _volatilityOracle) Ownable(msg.sender) {
         volatilityOracle = IVolatilityOracle(_volatilityOracle);
     }
 
-    function getFee(uint256 volume, uint160 currentPrice) external returns (uint24) {
-        return calculateFeeDecimal(volume, volatilityOracle.getPriceVariance(), currentPrice);
+    function getFee(uint256 volume) external view returns (uint24) {
+        uint256 scaled_volume = volume / STANDARD_VOLUME;
+        uint256 scaled_variance = volatilityOracle.getPriceVariance() / STANDARD_VARIANCE;
+
+        uint256 fee =
+            MIN_FEE + (CONSTANT_FACTOR * scaled_volume * scaled_variance * 100) / VOLUME_DECIMALS / VARIANCE_DECIMALS;
+
+        return uint24(fee);
     }
 
-    /// @notice Calculates fee percentage as a decimal with 18 decimals precision
-    /// @param volume The trading volume
-    /// @param variance The price variance (expected as a decimal, e.g., 0.5 = 0.5e18)
-    /// @param price The current price as a decimal (e.g., 2000.5 = 2000.5e18)
-    /// @return feePercent The fee percentage as a decimal (e.g., 0.01 = 1% = 0.01e18)
-    function calculateFeeDecimal(uint256 volume, uint256 variance, uint256 price) public view returns (uint24) {
-        // Scale volume by ETH_VOL_SCALE
-        uint256 scaledVolume = (volume * 1e18) / ETH_VOL_SCALE;
-
-        // Calculate base fee with constant factor
-        uint256 constantFactor = 2e18; // 2.0 in fixed point
-        uint256 feePerLot = MIN_FEE + ((constantFactor * scaledVolume * variance) / 1e36);
-
-        // Convert to percentage of price
-        uint256 feePercent = (feePerLot * 1e18) / price;
-
-        // Convert to basis points (1 bp = 0.01%)
-        return uint24((feePercent * 10000) / 1e18);
+    function setVolatilityOracle(address _volatilityOracle) public onlyOwner {
+        volatilityOracle = IVolatilityOracle(_volatilityOracle);
     }
 
     function setMinFee(uint256 _minFee) public onlyOwner {
         MIN_FEE = _minFee;
+    }
+
+    function setStandardVolume(uint256 _standardVolume) public onlyOwner {
+        STANDARD_VOLUME = _standardVolume;
+    }
+
+    function setStandardVariance(uint256 _standardVariance) public onlyOwner {
+        STANDARD_VARIANCE = _standardVariance;
+    }
+
+    function setConstantFactor(uint256 _constantFactor) public onlyOwner {
+        CONSTANT_FACTOR = _constantFactor;
     }
 }

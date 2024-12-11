@@ -83,12 +83,8 @@ contract OracleBasedFeeHook is BaseHook, Ownable {
         override
         returns (bytes4, BeforeSwapDelta, uint24)
     {
-        // Get the current price ticlk
-        PoolId poolId = key.toId();
-        (uint160 sqrtPriceX96,,,) = poolManager.getSlot0(poolId);
-
         // Update fee based on the oracle
-        uint24 fee = calcLib.getFee(abs(swapData.amountSpecified), sqrtPriceX96);
+        uint24 fee = feeOracle.getFee(abs(swapData.amountSpecified));
         poolManager.updateDynamicLPFee(key, fee);
         emit FeeUpdate(fee, block.timestamp);
 

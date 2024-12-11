@@ -3,7 +3,8 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {PoolModifyLiquidityTest} from "@v4-core/test/PoolModifyLiquidityTest.sol";
 import {IPoolManager} from "@v4-core/interfaces/IPoolManager.sol";
 import {PoolManager} from "@v4-core/PoolManager.sol";
@@ -16,8 +17,9 @@ import {Faucet} from "contracts/Faucet.sol";
 contract FaucetDeployment is Script {
     using CurrencyLibrary for Currency;
 
-    address constant SETH_ADDRESS = address(0x9E4a871A6936A14925b63D6687674853cdB9C5CA);
-    address constant SUSDC_ADDRESS = address(0x9042F100086279F09b45f29C2f61376980b28d69);
+    // Set up Address
+    address cethAddr = vm.envAddress("CETH_ADDRESS");
+    address cusdcAddr = vm.envAddress("CUSDC_ADDRESS");
 
     address deployer;
 
@@ -28,8 +30,11 @@ contract FaucetDeployment is Script {
         vm.startBroadcast(deployer);
 
         // Deploy Faucet
-        Faucet faucet = new Faucet(SETH_ADDRESS, SUSDC_ADDRESS);
-        IERC20(SETH_ADDRESS).transfer(address(faucet), IERC20(SETH_ADDRESS).balanceOf(deployer) - 100e18);
-        IERC20(SUSDC_ADDRESS).transfer(address(faucet), IERC20(SUSDC_ADDRESS).balanceOf(deployer) - 100e18);
+        Faucet faucet = new Faucet(cethAddr, cusdcAddr);
+        console.log("Faucet Deployed");
+        console.log("CETH Balance: ", IERC20(cethAddr).balanceOf(deployer));
+        console.log("CUSDC Balance: ", IERC20(cusdcAddr).balanceOf(deployer));
+        IERC20(cethAddr).transfer(address(faucet), IERC20(cethAddr).balanceOf(deployer) - 100e18);
+        IERC20(cusdcAddr).transfer(address(faucet), IERC20(cusdcAddr).balanceOf(deployer) - 100e18);
     }
 }
