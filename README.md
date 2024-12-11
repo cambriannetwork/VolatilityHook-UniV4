@@ -1,5 +1,9 @@
-## Volatility Hook for Uniswap V4
+## Cambrian's Uniswap V4 Demo - Hook Smart Contract 
 
 **Description**
 
-This repo contains code for a votality v4-hook. 
+This repo is part of the Cambrian's Uniswap V4 demo, focusing on smart contract developments. 
+
+It contains a Hook contract and other related contracts such as Oracle, Fee Calculation in it. 
+
+All the deployment scripts and unit test can be found in the repo!
